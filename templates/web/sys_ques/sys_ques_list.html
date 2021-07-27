@@ -1,0 +1,126 @@
+{% extends 'web/layout.html' %}
+
+{% block content %}
+<script>
+    $('span').each(function () {
+        if ($(this).html() === "시스템 문의사항") {
+            $(this).parents('li').addClass('active');
+            return false;
+        }
+    });
+
+    $(document).ready(function () {
+        $('.menumodify').hide();
+        $('.menumodify').css({
+            height: '25px',
+            fontSize: '10px'
+        });
+        $('.menu').hover(function () {
+            $(this).find('.menumodify').show();
+        }, function () {
+            $(this).find('.menumodify').hide();
+        });
+    });
+</script>
+
+<!-- Begin Page Content -->
+<div class="container-fluid">
+    <!-- Content Row -->
+    <div class="row">
+        <div class="col-xl-12 col-lg-12">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-dark">시스템 문의사항</h6>
+                </div>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div style="text-align: right">
+                        {% if session.owner.owner_id != 'admin@kakao.com' %}
+                        <button type="button" class="btn btn-outline-success" data-toggle="modal" data-target="#sys_qna_add">추가</button>
+                        {% endif %}
+                    </div>
+                    <br>
+                    <table class="table table-hover" style="text-align: center">
+                        <thead class="bg-warning font-weight-bold text-light">
+                        <tr>
+                            <th>순번</th>
+                            <th>제목</th>
+                            <th>작성일</th>
+                            <th>답변일</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for i in list %}
+                        <tr class="menu" onclick="location.href='sys_ques_detail?sys_ques_seq={{i.sys_ques_seq}}'">
+                            <td>{{len(list) - loop.index + 1}}</td>
+                            <td>{{i.sys_ques_title}}</td>
+                            <td>{{i.in_date}}</td>
+                            <td>
+                                {% if i.reply_in_date %}
+                                {{i.reply_in_date}}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- sys_qna_add Modal-->
+<div class="modal fade" id="sys_qna_add" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">문의사항을 작성하시오</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+
+
+            <div class="modal-body">
+
+                <form name="frm" action="sys_ques_add" method="post" enctype="multipart/form-data">
+                    <table class="table" style="text-align: center">
+                        <tr>
+                            <th>제목</th>
+                            <td><input type="text" class="form-control" name="title" value="" width="500px" required></td>
+                        </tr>
+                        <tr>
+                            <th>내용</th>
+                            <td><textarea name="content" class="form-control" rows="9" required></textarea></td>
+                        </tr>
+                        <tr>
+                            <th>표시여부</th>
+                            <td>
+                                <input type="radio" name="display_yn" value="y" checked>표시
+                                <input type="radio" name="display_yn" value="n">비표시
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>첨부파일</th>
+                            <td>
+                                <input type="file" name="file"/>
+                            </td>
+                        </tr>
+                    </table>
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-dark">추가하기</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>회원가입</title>
+    <link rel="stylesheet" href="lib/bootstrap/4.6.0/css/bootstrap.min.css">
+    <link href="lib/SB-Admin-2/css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="lib/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <script src="lib/jquery/jquery-3.6.0.min.js"></script>
+    <script src="lib/bootstrap/4.6.0/js/bootstrap.bundle.min.js"></script>
+    <script src="lib/SB-Admin-2/js/sb-admin-2.min.js"></script>
+
+    <script type="text/javascript">
+        function getaddress() {
+            $.ajax({
+                url: 'https://dapi.kakao.com/v2/local/search/address.json?query=' + encodeURIComponent($('#add1').val()) + '&size=30',
+                type: 'GET',
+                headers: {'Authorization': 'KakaoAK 26a57e202a118708213a612eee4232fa'},
+                success: function (data) {
+                    if (data.documents.length === 0) {
+                        let res = '    <div class="card col-12">\n'
+                        res += '        <div class="card-body">\n'
+                        res += '            검색된 주소가 없습니다.\n'
+                        res += '       </div>\n'
+                        res += '    </div>\n'
+                        $('#result').html(res)
+                    } else {
+                        let res = ''
+                        res += '<div class="card col-12">'
+                        res += '    <ul class="list-group list-group-flush">'
+                        for (let i = 0; i < data.documents.length; i++) {
+                            res += '        <li id="kakaoadd' + i + '" class="list-group-item" onclick="select_address(\'kakaoadd' + i + '\')">' + data.documents[i].address_name + '</li>'
+                        }
+                        res += '    </ul>'
+                        res += '</div>'
+                        $('#result').html(res);
+                    }
+                },
+                error: function (e) {
+                    console.log(e);
+                }
+            });
+        }
+
+        function select_address(kakaoadd_id) {
+            $('input[name=owner_add1]').val($('#' + kakaoadd_id).html());
+            $('#AddSearchModal').modal('hide');
+        }
+
+        $(function () {
+            $('input[name=owner_pwd]').keyup(function () {
+                if (pw_check()) {
+                    $('input[name=owner_pwd]').next().removeClass('badge-danger').html('조건을 만족합니다.').addClass('badge-success');
+                } else {
+                    $('input[name=owner_pwd]').next().removeClass('badge-success').html('비밀번호는 영문자, 숫자, 특수문자를 포함한 8 ~ 15자리여야 합니다.').addClass('badge-danger');
+                }
+            }).focusout(function () {
+                if (pw_check()) {
+                    $('input[name=owner_pwd]').next().html('');
+                }
+            });
+
+            $('input[name=owner_pwd_check]').keyup(function () {
+                if (pw_double_check()) {
+                    $('input[name=owner_pwd_check]').next().removeClass('badge-danger').html('비밀번호가 일치합니다.').addClass('badge-success');
+                } else {
+                    $('input[name=owner_pwd_check]').next().removeClass('badge-success').html('비밀번호가 일치하지 않습니다.').addClass('badge-danger');
+                }
+            }).focusout(function () {
+                if (pw_double_check()) {
+                    $('input[name=owner_pwd_check]').next().html('');
+                }
+            });
+
+            $('input[name=owner_str_tel]').keyup(function () {
+                if (str_tel_check()) {
+                    $('input[name=owner_str_tel]').next().removeClass('badge-danger').html('사용할 수 있는 전화번호입니다.').addClass('badge-success');
+                } else {
+                    $('input[name=owner_str_tel]').next().removeClass('badge-success').html('사용할 수 없는 전화번호입니다.').addClass('badge-danger');
+                }
+            }).focusout(function () {
+                if (str_tel_check()) {
+                    $('input[name=owner_str_tel]').next().html('');
+                }
+            });
+
+            $('input').keyup(function () {
+                field_fill_check();
+            }).focusout(function () {
+                field_fill_check();
+            });
+        });
+
+        function name_check() {
+            return $.trim($('input[name=owner_name]').val()).length > 0
+        }
+
+        function id_check() {
+            let owner_id = $('input[name=owner_id]').val();
+
+            const regEmail = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/i;
+            if (!regEmail.test(owner_id)) {
+                alert('이메일이 형식을 만족하지 않습니다.');
+                return false;
+            }
+
+            let param = "dummy=" + Math.random();
+            param += "&owner_id=" + owner_id;
+
+            $.ajax({
+                async: true,
+                type: 'POST',
+                data: param,
+                url: "id_check.ajax",
+                dataType: "json",
+                success: function (data) {
+                    if (data.cnt > 0) {
+                        alert("이미 존재하는 아이디입니다. 다른 아이디를 입력해주세요.");
+                    } else {
+                        alert("사용가능한 아이디입니다.");
+                        $('input[name=owner_id]').attr('readonly', true);
+                    }
+                },
+                error: function (error) {
+                    alert("error : " + error);
+                }
+            });
+        }
+
+        function pw_check() {
+            const regPwd = /^.*(?=^.{8,15}$)(?=.*\d)(?=.*[a-zA-Z])(?=.*[!@#$%^&+=]).*$/;
+            return regPwd.test($('input[name=owner_pwd]').val())
+        }
+
+        function pw_double_check() {
+            return $('input[name=owner_pwd]').val() === $('input[name=owner_pwd_check]').val()
+        }
+
+        function str_num_check() {
+            let owner_str_num = $('input[name=owner_str_num]').val();
+
+            const regStrNum = /^\d{3}-\d{2}-\d{5}$/;
+            if (!regStrNum.test(owner_str_num)) {
+                alert('사업자등록번호가 형식을 만족하지 않습니다.');
+                return false;
+            }
+
+            let param = "dummy=" + Math.random();
+            param += "&owner_str_num=" + owner_str_num;
+
+            $.ajax({
+                async: true,
+                type: 'POST',
+                data: param,
+                url: "owner_str_num_check.ajax",
+                dataType: "json",
+                success: function (data) {
+                    if (data.cnt > 0) {
+                        alert("이미 존재하는 사업자 등록번호입니다.");
+                    } else {
+                        alert("사용 가능합니다.");
+                        $('input[name=owner_str_num]').attr('readonly', true);
+                    }
+                },
+                error: function (error) {
+                    alert("error : " + error);
+                }
+            });
+        }
+
+        function str_name_check() {
+            return $.trim($('input[name=owner_str_name]').val()).length > 0
+        }
+
+        function str_tel_check() {
+            const regTel = /^\d{2,3}-\d{3,4}-\d{4}$/;
+            return regTel.test($('input[name=owner_str_tel]').val())
+        }
+
+        function logo_check() {
+            return $.trim($('input[name=logo]').val()).length > 0
+        }
+
+        function add1_check() {
+            return $.trim($('input[name=owner_add1]').val()).length > 0
+        }
+
+        function add2_check() {
+            return $.trim($('input[name=owner_add2]').val()).length > 0
+        }
+
+        function field_fill_check() {
+            if (name_check()
+                && $('input[name=owner_id]').attr('readonly') === 'readonly'
+                && pw_check()
+                && pw_double_check()
+                && $('input[name=owner_str_num]').attr('readonly') === 'readonly'
+                && str_name_check()
+                && str_tel_check()
+                && logo_check()
+                && add1_check()
+                && add2_check()) {
+                $('#submit').attr('disabled', false);
+            } else {
+                $('#submit').attr('disabled', true);
+            }
+        }
+    </script>
+
+</head>
+<body>
+<div class="container">
+
+    <div class="card o-hidden border-0 shadow-lg my-5">
+        <div class="card-body p-0">
+            <!-- Nested Row within Card Body -->
+            <div class="row">
+                <div class="col-lg-5 d-none d-lg-block bg-login-image" style="background-image: url('downloads?path=uploads&file=logo_color_motified.jpeg')"></div>
+                <div class="col-lg-7">
+                    <div class="p-5">
+                        <div class="text-center">
+                            <h1 class="h4 text-gray-900 mb-4">회원가입</h1>
+                        </div>
+                        <form class="user" action="register" method="post" enctype="multipart/form-data" name="register_form">
+                            <div class="form-group">
+                                <input type="text" class="form-control form-control-user" name="owner_name" placeholder="이름" required>
+                                <span class="badge badge-pill"></span>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-8">
+                                    <input type="email" class="form-control form-control-user" name="owner_id" placeholder="아이디 ( 이메일 )" required>
+                                    <span class="badge badge-pill"></span>
+                                </div>
+                                <div class="col-4">
+                                    <button type="button" class="btn btn-primary btn-user" onclick="id_check()">아이디 중복 확인</button>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-sm-6 mb-3 mb-sm-0">
+                                    <input type="password" class="form-control form-control-user" name="owner_pwd" placeholder="비밀번호" required>
+                                    <span class="badge badge-pill"></span>
+                                </div>
+                                <div class="col-sm-6">
+                                    <input type="password" class="form-control form-control-user" name="owner_pwd_check" placeholder="비밀번호 확인" required>
+                                    <span class="badge badge-pill"></span>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <div class="form-group row">
+                                <div class="col-8">
+                                    <input type="text" name="owner_str_num" class="form-control form-control-user" placeholder="사업자등록번호 또는 가맹점번호" required>
+                                    <span class="badge badge-pill"></span>
+                                </div>
+                                <div class="col-4">
+                                    <button type="button" class="btn btn-primary btn-user" onclick="str_num_check()">번호 중복 확인</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="owner_str_name" class="form-control form-control-user" placeholder="상호명" required>
+                            </div>
+
+                            <div class="form-group">
+                                <input type="text" name="owner_str_tel" class="form-control form-control-user" placeholder="가게전화번호" required>
+                                <span class="badge badge-pill"></span>
+                            </div>
+
+                            <div class="form-group row">
+                                <div class="col-sm-3">
+                                    <p align="center">회사 로고 지정</p>
+                                </div>
+                                <div class="col-sm-9 mb-3 mb-sm-0">
+                                    <input type="file" name="logo" class="form-control-file border" required>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <div class="form-group row">
+                                <div class="col-8">
+                                    <input type="text" name="owner_add1" class="form-control form-control-user" placeholder="주소" readonly required>
+                                </div>
+                                <div class="col-4">
+                                    <button data-toggle="modal" data-target="#AddSearchModal" type="button" class="btn btn-primary btn-user">주소검색</button>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-8">
+                                    <input type="text" name="owner_add2" class="form-control form-control-user" placeholder="상세주소" required>
+                                </div>
+                            </div>
+                            <button type="submit" id="submit" class="btn btn-primary btn-user btn-block">Register Account</button>
+                        </form>
+                        <hr>
+                        <div class="text-center">
+                            <a class="small" href="forgot-password.html">비밀번호를 잊으셨나요?</a>
+                        </div>
+                        <div class="text-center">
+                            <a class="small" href="login.html">이미 계정이 있으신가요? 로그인!</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- address search Modal-->
+<div class="modal fade" id="AddSearchModal" tabindex="-1" role="dialog" aria-labelledby="AddSearchModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">우편번호 검색</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                찾고자 하는 동을 입력하세요.
+                <input type="text" id="add1">
+                <input type="button" value="검색" onclick="getaddress()">
+                <div id="result" class="row">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end of address modify Modal-->
+
+
+</body>
+</html>

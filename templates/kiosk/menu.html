@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="lib/bootstrap/4.6.0/css/bootstrap.min.css">
+    <link href="lib/SB-Admin-2/css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="lib/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <script src="lib/jquery/jquery-3.6.0.min.js"></script>
+    <script src="lib/bootstrap/4.6.0/js/bootstrap.bundle.min.js"></script>
+    <script src="lib/Chart.js/3.0.2/chart.min.js"></script>
+    <script src="lib/SB-Admin-2/js/sb-admin-2.min.js"></script>
+    <script src="lib/js/input-spinner.js"></script>
+    <style>
+        html, body {
+            margin: 0;
+            height: 100%;
+            overflow: auto;
+        }
+
+        #voice {
+            z-index: 999;
+            position: fixed;
+            bottom: 50px;
+            right: 50px;
+        }
+    </style>
+    <script type="text/javascript">
+        function fn_k_home() {
+            location.href = "kiosk_home"
+        }
+
+        $(function () {
+            $("input[type=number]").inputSpinner();
+        });
+
+
+        $(function () {
+            $("input[type='number']").inputSpinner();
+            fn_cate('{{cate_list[0].cate_seq}}');
+        });
+
+        function menu_render(data) {
+            let menu = ''
+            for (var i = 0; i < data.menu_list.length; i++) {
+                menu += '       <div class="col-sm-3">'
+                menu += '            <div class="card" onclick="add_to_bucket(\'' + data.menu_list[i].menu_seq + '\', \'' + data.menu_list[i].menu_name + '\', \'' + data.menu_list[i].menu_price + '\')">'
+                menu += '              <div class="card_body">'
+                menu += '                <img class="card-img-top" src="downloads?path=' + data.menu_list[i].attach_path + '&file=' + data.menu_list[i].attach_file + '">'
+                menu += '                <p>' + data.menu_list[i].menu_name + '</p>'
+                menu += '                </div>'
+                menu += '          	  </div>'
+                menu += '          </div>'
+            }
+            $('#menu_list').html(menu);
+        }
+
+        function fn_cate(cate_seq) {
+            if (cate_seq === 0) {
+                search_menu_ajax('')
+            } else {
+                let param = Math.random()
+                param += "&cate_seq=" + cate_seq
+
+                $.ajax({
+                    type: "post",
+                    url: "select_menu.ajax",
+                    dataType: "json",
+                    data: param,
+                    error: function () {
+                        alert('통신 실패!!');
+                    },
+                    success: function (data) {
+                        $("nav a").each(function () {
+                            $(this).removeClass("active");
+                        });
+                        menu_render(data)
+
+                        $("nav a").each(function () {
+                            if (cate_seq === $(this).attr('rel')) {
+                                $(this).addClass("active");
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
+        function add_to_bucket(menu_seq, menu_name, menu_price) {
+            if (document.getElementById('menu_seq_' + menu_seq) === null) {
+                let item = '            <div class="row" id="menu_seq_' + menu_seq + '">'
+                item += '            <p class="col-12"></p>'
+                item += '                <input type="hidden" name="menu_price_' + menu_seq + '" value="' + menu_price + '" disabled >'
+                item += '                <div class="col-4">' + menu_name + '</div>'
+                item += '                <div class="col-5"><input name="menuseq_' + menu_seq + '" type="number" value="1" min="1"></div>'
+                item += '                <div class="col-3">'
+                item += '                    <span>' + menu_price + '</span>'
+                item += '                    <button type="button" class="btn">×</button>'
+                item += '                </div>'
+                item += '                <br/>'
+                item += '            </div>'
+                $('#bucket').append(item);
+
+                $("#menu_seq_" + menu_seq + " button").on('click', function () {
+                    $("#menu_seq_" + menu_seq).remove();
+
+                    calcMoney();
+                });
+
+                $("#menu_seq_" + menu_seq + " input[name=menuseq_" + menu_seq + "]").inputSpinner();
+                $("#menu_seq_" + menu_seq + " input[name=menuseq_" + menu_seq + "]").change(function () {
+                    $("#menu_seq_" + menu_seq + " span").html($("input[name=menu_price_" + menu_seq + "]").val() * parseInt($("#menu_seq_" + menu_seq + " input[name=menuseq_" + menu_seq + "]").val()));
+                    calcMoney();
+                });
+                calcMoney();
+            } else {
+                $("#menu_seq_" + menu_seq + " input[name=menuseq_" + menu_seq + "]").val(parseInt($("#menu_seq_" + menu_seq + " input[name=menuseq_" + menu_seq + "]").val()) + 1);
+                $("#menu_seq_" + menu_seq + " span").html($("input[name=menu_price_" + menu_seq + "]").val() * parseInt($("#menu_seq_" + menu_seq + " input[name=menuseq_" + menu_seq + "]").val()));
+                calcMoney();
+            }
+        }
+
+        function calcMoney() {
+            let sumMoney = 0
+            $("#bucket span").each(function () {
+                sumMoney += parseInt($(this).html())
+            });
+            if (sumMoney > 0) {
+                $("#pay span").html(sumMoney + "원 ");
+            } else {
+                $("#pay span").html("");
+            }
+        }
+
+        function click_pay_button() {
+            if ($.trim($('#bucket').html()) === "") {
+                $('#bucket_empty').modal('show');
+            } else {
+                $('#payment_tool').modal('show');
+            }
+        }
+
+        let flag_siri = false;
+        $(document).ready(function () {
+            $('#pay').on('click', function () {
+                click_pay_button();
+            });
+
+            $('#siri').popover({
+                title: '음성인식 주문을 시작합니다.',
+                content: '<p id="message">원하시는 메뉴를 말해주세요.</p><div id=\'korea\' class=\'textbox\'></div>',
+                html: true
+            });
+            $('#siri').data('popover');
+            $('#siri').on('click', function () {
+                if (flag_siri) {
+                    recognition.stop();
+                    flag_siri = false;
+                    $('#siri').attr("src", "downloads?path=uploads/img&file=siri.png");
+                } else {
+                    $('#siri').attr("src", "downloads?path=uploads/img&file=siri_ing.gif");
+                    $('#siri').attr('data-content', '<p id="message">원하시는 메뉴를 말해주세요.</p><div id=\'korea\' class=\'textbox\'></div>');
+                    $('#siri').popover('show');
+                    speak_to_siri();
+                }
+            });
+        });
+
+        window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        // 인스턴스 생성
+        const recognition = new SpeechRecognition();
+        // true면 음절을 연속적으로 인식하나 false면 한 음절만 기록함
+        recognition.interimResults = false;
+        // 값이 없으면 HTML의 <html lang="en">을 참고합니다. ko-KR, en-US
+        recognition.lang = "ko-KR";
+        // recognition.lang = "en-US";
+        // true means continuous, and false means not continuous (single result each time.)
+        // true면 음성 인식이 안 끝나고 계속 됩니다.
+        recognition.continuous = false;
+        // 숫자가 작을수록 발음대로 적고, 크면 문장의 적합도에 따라 알맞은 단어로 대체합니다.
+        // maxAlternatives가 크면 이상한 단어도 문장에 적합하게 알아서 수정합니다.
+        recognition.maxAlternatives = 5;
+
+        function speak_to_siri() {
+            recognition.start();
+            flag_siri = true;
+            isRecognizing = true;
+            recognition.onresult = function (event) {
+                let transcript = event.results[0][0].transcript;
+                console.log(transcript);
+                $('#siri').popover('hide');
+                $('#siri').attr('data-content', transcript);
+                $('#siri').data('popover');
+                $('#siri').popover('show');
+                $('#siri').attr("src", "downloads?path=uploads/img&file=siri.png");
+                flag_siri = false;
+                setTimeout(function () {
+                    $('#siri').popover('hide');
+                }, 3000);
+                if (transcript === '결제' || transcript === '주문') {
+                    click_pay_button();
+                } else {
+                    search_menu_ajax(transcript);
+                }
+            }
+        }
+
+        function search_menu_ajax(msg) {
+            var param = ""
+            param += "dummy=" + Math.random()
+            param += "&msg=" + msg
+            console.log(param)
+            $.ajax({
+                type: "post",
+                url: "search_menu.ajax",
+                dataType: "json",
+                data: param,
+                error: function () {
+                    alert('통신 실패!!');
+                },
+                success: function (data) {
+                    $("nav a").each(function () {
+                        $(this).removeClass("active");
+                    });
+                    menu_render(data)
+
+                    $("nav a").each(function () {
+                        if ('0' === $(this).attr('rel')) {
+                            $(this).addClass("active");
+                        }
+                    });
+                }
+            });
+        }
+
+        function fn_add() {
+            if ($("textarea[name='content']").val().replace(" ", "") < 1) {
+                alert("작성한 글이 없습니다.")
+                $("textarea[name='content']").focus();
+            } else {
+                document.voc_add.submit();
+            }
+        }
+
+        $(function () {
+            $("#vocaddModal").on("shown.bs.modal", function () {
+                $("textarea[name='content']").focus();
+            });
+
+            if (location.port !== '') {
+                $('input[name=url]').val(location.protocol + '//' + document.domain + ':' + location.port);
+            } else {
+                $('input[name=url]').val(location.protocol + '//' + document.domain);
+            }
+        });
+    </script>
+</head>
+
+<body>
+<form action="kiosk_pay_form" method="post" class="h-100" style="text-align: center">
+<input type="hidden" name="url" value="">
+    <img src="downloads?path={{logo_path}}&file={{logo_file}}" width="auto" height="10%" style="margin-left:5%">
+    <nav style="float: right; margin-right:3%; margin-top: 1%">
+        <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#vocaddModal">고객소리함</button>
+    </nav>
+    <div class="container-fluid" style="height: 90%">
+        <div class="row h-100">
+            <div class="col-sm-7 h-100">
+                <nav class="nav nav-pills nav-fill">
+                    {% for c in cate_list %}
+                    <a class="nav-item nav-link" rel="{{c.cate_seq}}" href="javascript:fn_cate('{{c.cate_seq}}')">{{c.cate_name}}</a>
+                    {% endfor %}
+                    <a class="nav-item nav-link" rel='0' href="javascript:fn_cate(0)">검색</a>
+                </nav>
+                <hr>
+                <div class="row menu" id="menu_list">
+                </div>
+            </div>
+            <!-- 장바구니 -->
+            <div class="col-sm-5 h-100">
+                <div class="h-75" style="overflow-x: hidden;overflow-y: auto">
+                    <div class="row" style="padding-top: 8px; padding-bottom: 8px">
+                        <div class="col-4">메뉴명</div>
+                        <div class="col-5">수량</div>
+                        <div class="col-3">가격</div>
+                    </div>
+                    <hr>
+                    <div class="h-75" style="overflow-x: hidden;overflow-y: auto" id="bucket"></div>
+                </div>
+
+                <div class="w-100 h-25">
+                    <div class="btn-group-vertical h-100 w-100">
+                        <button type="button" class="btn btn-warning btn-lg btn-block" id="pay"><span></span>결제</button>
+                        <button type="button" class="btn btn-danger btn-lg btn-block" onclick="fn_k_home()">취소</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="payment_tool" tabindex="-1" role="dialog" aria-labelledby="kakaopay"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="kakaopay">결제하기</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">결제를 진행하시겠습니까?</div>
+                <div class="modal-footer">
+                    <button class="btn btn-danger" type="submit">결제하기</button>
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="bucket_empty" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">장바구니가 비었습니다</div>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">메뉴를 선택해주세요</div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div id="voice">
+    <img src="downloads?path=uploads/img&file=siri.png" class="rounded-circle" width="150px" height="auto" id="siri">
+</div>
+<!-- voc_add-->
+<div class="modal fade" id="vocaddModal" tabindex="-1" role="dialog" aria-labelledby="vocaddmod" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="vocaddmod">소리함 추가</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- voc add Modal content -->
+                <div class="row">
+                    <div class="col-xl-12 col-lg-12">
+                        <div class="card shadow mb-4">
+                            <!-- Card Header - Dropdown -->
+                            <form action="voc_addact" method="post" name="voc_add" enctype="multipart/form-data">
+                                <table class="table" style="text-align: center">
+                                    <tr>
+                                        <th>내용</th>
+                                        <td>
+                                            <textarea class="form-control" rows="5" cols="100" name="content" required></textarea>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <!-- end of voc Modal content -->
+            </div>
+            <div style="text-align: right" class="modal-footer">
+                <button type="button" class="btn btn-outline-warning" onclick="fn_add()">등록 완료</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

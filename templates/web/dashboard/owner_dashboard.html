@@ -1,0 +1,195 @@
+{% extends 'web/layout.html' %}
+{% block content %}
+    <style>
+        .h-400 {
+            height: 400px
+        }
+    </style>
+
+    <script>
+        $('span').each(function () {
+            if ($(this).html() === "Dashboard") {
+                $(this).parents('li').addClass('active');
+                return false;
+            }
+        });
+
+        $(function () {
+            google.charts.load('current', {packages: ['corechart', 'bar']});
+            google.charts.setOnLoadCallback(drawChart);
+
+            function drawChart() {
+                //이번 달 메뉴별 판매량
+                var data = google.visualization.arrayToDataTable([
+                    ['메뉴명', '판매량'],
+                    {% for menuCntChart in menuCntChart_this %}
+                        ['{{menuCntChart.menu_name}}', {{menuCntChart.menu_cnt}}],
+                    {% endfor %}
+                ])
+                var options = {
+                    is3D: true,
+                    colors: [
+                        '#ff6384', '#ff9f40', '#ffcd56', '#4bc0c0', '#36a2eb', '#9966ff'
+                    ],
+                };
+                var chart = new google.visualization.PieChart(document.getElementById('menucnt_this'));
+                chart.draw(data, options);
+
+                //이번 달 메뉴별 매출
+                data = google.visualization.arrayToDataTable([
+                    ['메뉴명', '매출'],
+                    {% for menuSalesChart in menuSalesChart_this %}
+                        ['{{menuSalesChart.menu_name}}', {{menuSalesChart.menu_sales}}],
+                    {% endfor %}
+                ])
+                options = {
+                    pieHole: 0.4,
+                    colors: [
+                        '#ff6384',
+                        '#9966ff',
+                        '#36a2eb',
+                        '#ff9f40',
+                        '#ffcd56',
+                        '#4bc0c0',
+                    ],
+                };
+                chart = new google.visualization.PieChart(document.getElementById('menusales_this'));
+                chart.draw(data, options);
+
+                //지난 달 메뉴별 판매량
+                data = google.visualization.arrayToDataTable([
+                    ['메뉴명', '판매량'],
+                    {% for menuCntChart in menuCntChart_last %}
+                        ['{{menuCntChart.menu_name}}', {{menuCntChart.menu_cnt}}],
+                    {% endfor %}
+                ])
+                options = {
+                    pieHole: 0.4,
+                    colors: [
+                        '#9966ff',
+                        '#ff9f40',
+                        '#4bc0c0',
+                        '#ff6384',
+                        '#ffcd56',
+                        '#36a2eb',
+                    ],
+                };
+                chart = new google.visualization.PieChart(document.getElementById('menucnt_last'));
+                chart.draw(data, options);
+
+                //지난 달 메뉴별 매출
+                data = google.visualization.arrayToDataTable([
+                    ['메뉴명', '매출'],
+                    {% for menuSalesChart in menuSalesChart_last %}
+                        ['{{menuSalesChart.menu_name}}', {{menuSalesChart.menu_sales}}],
+                    {% endfor %}
+                ])
+                options = {
+                    is3D: true,
+                    colors: [
+                        '#ff9f40',
+                        '#9966ff',
+                        '#36a2eb',
+                        '#4bc0c0',
+                        '#ffcd56',
+                        '#ff6384',
+                    ],
+                };
+                chart = new google.visualization.PieChart(document.getElementById('menusales_last'));
+                chart.draw(data, options);
+
+
+                data = google.visualization.arrayToDataTable([
+                    ['월', '매출'],
+                    {% for saleChart in salesChart %}
+                        ['{{saleChart.period[-2:]}}', {{saleChart.sales}}],
+                    {% endfor %}
+                ])
+                options = {
+                    hAxis: {title: '월', titleTextStyle: {color: '#333'}},
+                    vAxis: {minValue: 0},
+                    legend: {position: 'top'},
+                    lineWidth: 3,
+                    colors: ['#5eb8ff']
+                };
+                chart = new google.visualization.LineChart(document.getElementById('salesChart'));
+                chart.draw(data, options);
+
+            }
+        })
+    </script>
+
+    <div class="container-fluid">
+        <!-- Content Row -->
+        <div class="row">
+            <!-- Pie Chart -->
+            <div class="col-xl-6">
+                <div class="card shadow mb-4">
+                    <!-- Card Header - Dropdown -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-dark">이번 달 제품별 판매량</h6>
+                    </div>
+                    <!-- Card Body -->
+                    <div class="card-body w-100">
+                        <div id="menucnt_this" class="w-100 h-400"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- Pie Chart -->
+            <div class="col-xl-6">
+                <div class="card shadow mb-4">
+                    <!-- Card Header - Dropdown -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-dark">이번 달 제품별 매출</h6>
+                    </div>
+                    <!-- Card Body -->
+                    <div class="card-body w-100">
+                        <div id="menusales_this" class="w-100 h-400"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pie Chart -->
+            <div class="col-xl-6">
+                <div class="card shadow mb-4">
+                    <!-- Card Header - Dropdown -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-dark">지난 달 제품 별 판매량</h6>
+                    </div>
+                    <!-- Card Body -->
+                    <div class="card-body w-100">
+                        <div id="menucnt_last" class="w-100 h-400"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pie Chart -->
+            <div class="col-xl-6">
+                <div class="card shadow mb-4">
+                    <!-- Card Header - Dropdown -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-dark">지난 달 제품별 매출</h6>
+                    </div>
+                    <!-- Card Body -->
+                    <div class="card-body w-100">
+                        <div id="menusales_last" class="w-100 h-400"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="card shadow mb-4">
+                    <!-- Card Header - Dropdown -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-dark">최근 1년 매출 추이</h6>
+                    </div>
+                    <!-- Card Body -->
+                    <div class="card-body w-100">
+                        <div id="salesChart" class="w-100 h-400"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+ 

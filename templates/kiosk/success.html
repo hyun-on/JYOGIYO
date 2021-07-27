@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko" class="h-100">
+<head>
+    <meta charset="UTF-8">
+    <title>kakaopay</title>
+    <link rel="stylesheet" href="lib/bootstrap/4.6.0/css/bootstrap.min.css">
+    <link href="lib/SB-Admin-2/css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="lib/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <script src="lib/jquery/jquery-3.6.0.min.js"></script>
+    <script src="lib/bootstrap/4.6.0/js/bootstrap.bundle.min.js"></script>
+    <script src="lib/Chart.js/3.0.2/chart.min.js"></script>
+    <script src="lib/SB-Admin-2/js/sb-admin-2.min.js"></script>
+</head>
+
+<body class="h-100">
+<div class="row h-100 w-100">
+    <div class="col-xl-4 col-lg-3 col-sm-2"></div>
+    <div class="col-xl-4 col-lg-6 col-sm-8 row align-self-center">
+        <div class="col-12 card">
+            <div class="card-body">
+                <h3 class="text-center">영수증</h3>
+                <p>{{owner.owner_str_name}} / {{owner.owner_name}}</p>
+                <p>{{owner.owner_str_num}}</p>
+                <p>TID : {{buyList.tid}}</p>
+                <p>Tel : {{owner.owner_str_tel}}</p>
+                <p>{{owner.owner_add1}} {{owner.owner_add2}}</p>
+                <hr>
+                <h4 class="text-center">[카카오페이결제]</h4>
+                <hr>
+                <p>가맹No. {{res.cid}}</p>
+                <p class="text-right">{{res.approved_at}}</p>
+                <hr>
+                <div class="row text-center">
+                    <div class="col-5">메뉴명</div>
+                    <div class="col-2">단가</div>
+                    <div class="col-2">개수</div>
+                    <div class="col-3">금액</div>
+                </div>
+                {% for menu in buyList.menu %}
+                <div class="row">
+                    <div class="col-5">{{menu.menu_name}}</div>
+                    <div class="col-2 text-right">{{menu.menu_price}}</div>
+                    <div class="col-2 text-center">{{menu.count}}</div>
+                    <div class="col-3 text-right">{{menu.menu_price * menu.count}}</div>
+                </div>
+                {% endfor %}
+                <hr>
+                <div class="row">
+                    <div class="col-6">합계</div>
+                    <div class="col-6 text-right">{{buyList.total_price}}</div>
+                </div>
+                <br>
+                <div class="card-footer text-center">
+                    <a href="kiosk_home" class="btn btn-outline-primary btn-block btn-lg">결제 완료</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4 col-lg-3 col-sm-2"></div>
+</div>
+</body>
+</html>

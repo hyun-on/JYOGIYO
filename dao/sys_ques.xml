@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sys_qna">
+
+    <select id="selectAll">
+    	SELECT
+    		sys_ques_seq, 
+    		owner_seq, 
+    		sys_ques_title, 
+    		sys_ques_content, 
+    		sys_ques_display_yn,
+    		attach_path,
+    		attach_file,
+			TO_CHAR(to_date(in_date, 'YYYYMMDD.HH24MISS'),'YYYY-MM-DD'),
+			in_user_id,
+			TO_CHAR(to_date(up_date, 'YYYYMMDD.HH24MISS'),'YYYY-MM-DD'),
+			up_user_id,
+			(select TO_CHAR(to_date(in_date, 'YYYYMMDD.HH24MISS'),'YYYY-MM-DD') from sys_answer where sys_ques_seq = q.sys_ques_seq)  
+    	FROM 
+    		sys_question q
+    	WHERE
+    		sys_ques_display_yn = 'y'
+		or
+			in_user_id = :1
+		or 
+			'admin@kakao.com' = :1 
+    	ORDER BY
+    		sys_ques_seq desc
+    </select>
+    
+    <select id="select">
+    	SELECT
+    		sys_ques_seq, 
+    		owner_seq, 
+    		sys_ques_title, 
+    		sys_ques_content, 
+    		sys_ques_display_yn,
+    		attach_path,
+    		attach_file,
+			TO_CHAR(to_date(in_date, 'YYYYMMDD.HH24MISS'),'YYYY-MM-DD'),
+			in_user_id,
+			TO_CHAR(to_date(up_date, 'YYYYMMDD.HH24MISS'),'YYYY-MM-DD'),
+			up_user_id,
+			(select TO_CHAR(to_date(in_date, 'YYYYMMDD.HH24MISS'),'YYYY-MM-DD') from sys_answer where sys_ques_seq = q.sys_ques_seq) 
+    	FROM 
+    		sys_question q
+    	WHERE
+    		sys_ques_seq = :1
+    </select>
+    
+    <update id="insert">
+    	INSERT INTO sys_question
+		(
+			sys_ques_seq, 
+			owner_seq,
+			sys_ques_title, 
+			sys_ques_content, 
+			sys_ques_display_yn,
+			attach_path, 
+			attach_file,
+			in_date,
+			in_user_id,
+			up_date,
+			up_user_id
+		) 
+		VALUES
+		(
+			sys_ques_seq.nextval,
+			:1,
+			:2,
+			:3,
+			:4,
+			:5,
+			:6,
+			to_char(sysdate,'yyyymmdd.hh24miss'),
+			:7,
+			to_char(sysdate,'yyyymmdd.hh24miss'),
+			:8
+		)
+    </update>
+    
+    <update id="update">
+    	UPDATE sys_question
+    	SET
+    		sys_ques_title = :1,
+    		sys_ques_content = :2,
+    		sys_ques_display_yn = :3,
+    		attach_path = :4,
+    		attach_file = :5,
+    		up_date = to_char(sysdate,'yyyymmdd.hh24miss')
+		WHERE
+			sys_ques_seq = :6
+    
+    </update>
+    
+    <update id="delete">
+    	DELETE FROM 
+			sys_question 
+		WHERE 
+			sys_ques_seq=:1 
+    </update>
+    
+    
+	<update id="delete_img">
+	        UPDATE 
+	            sys_question 
+	        SET 
+	            attach_path 	=:1,
+	            attach_file		=:2
+	        WHERE 
+	            sys_ques_seq	=:3
+    </update>    
+    
+    
+    
+    
+    
+</mapper>

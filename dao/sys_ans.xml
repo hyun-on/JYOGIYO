@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sys_qna">
+
+    <select id="selectAll">
+    	SELECT
+    		sys_ques_seq, 
+    		owner_seq, 
+    		sys_ques_title, 
+    		sys_ques_content, 
+    		sys_ques_display_yn,
+    		attach_path,
+    		attach_file,
+			TO_CHAR(to_date(in_date, 'YYYYMMDD.HH24MISS'),'YYYY-MM-DD'),
+			in_user_id,
+			up_date,
+			up_user_id
+    	FROM 
+    		sys_question
+    	ORDER BY
+    		sys_ques_seq desc
+    </select>
+    
+    <select id="select">
+    	SELECT
+    		sys_ques_seq, 
+    		sys_ans_reply, 
+			TO_CHAR(to_date(in_date, 'YYYYMMDD.HH24MISS'),'YYYY-MM-DD'),
+			in_user_id,
+			up_date,
+			up_user_id
+    	FROM 
+    		sys_answer
+    	WHERE
+    		sys_ques_seq = :1
+    </select>
+    
+    <update id="insert">
+    	MERGE INTO sys_answer A
+    		USING dual
+    		ON (A.sys_ques_seq = :1)
+   	 	WHEN MATCHED THEN
+	        UPDATE SET
+	        	sys_ans_reply = :2,
+	            in_date = to_char(sysdate,'yyyymmdd.hh24miss'),
+	            in_user_id = :3, 
+	            up_date = to_char(sysdate,'yyyymmdd.hh24miss'),
+	            up_user_id = :4
+                        
+    	WHEN NOT MATCHED THEN
+        	INSERT (sys_ques_seq, sys_ans_reply, in_date, in_user_id, up_date, up_user_id) 
+        	VALUES (
+        		:1, 
+        		:2, 
+        		to_char(sysdate,'yyyymmdd.hh24miss'), 
+        		:3, 
+        		to_char(sysdate,'yyyymmdd.hh24miss'),
+        		:4
+        		)
+    
+    </update>
+    
+    <update id="update">
+    </update>
+    
+    <update id="delete">
+    	DELETE 
+		FROM 
+			sys_answer 
+		WHERE 
+			sys_ques_seq=:1 
+    
+    </update>
+</mapper>

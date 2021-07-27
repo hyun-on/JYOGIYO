@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="User">
+    <select id="selectAll">
+        SELECT OWNER_SEQ,
+               EVENT_SEQ,
+               EVENT_TITLE,
+               EVENT_CONTENT,
+               TO_CHAR(EVENT_START, 'YYYY-MM-DD'),
+               TO_CHAR(EVENT_END, 'YYYY-MM-DD'),
+               ATTACH_PATH,
+               ATTACH_FILE,
+               IN_DATE,
+               IN_USER_ID,
+               UP_DATE,
+               UP_USER_ID
+        FROM EVENT
+        WHERE OWNER_SEQ = :V_OWNER_SEQ
+           OR EXISTS(SELECT 1
+                     FROM OWNER
+                     WHERE OWNER_SEQ = :V_OWNER_SEQ
+                       AND (ADMIN_YN = 'Y'
+                         OR ADMIN_YN = 'y'))
+        ORDER BY EVENT_SEQ DESC
+    </select>
+
+    <select id="select">
+        SELECT OWNER_SEQ,
+               EVENT_SEQ,
+               EVENT_TITLE,
+               EVENT_CONTENT,
+               TO_CHAR(EVENT_START, 'YYYY-MM-DD'),
+               TO_CHAR(EVENT_END, 'YYYY-MM-DD'),
+               ATTACH_PATH,
+               ATTACH_FILE,
+               IN_DATE,
+               IN_USER_ID,
+               UP_DATE,
+               UP_USER_ID
+        FROM EVENT
+        WHERE EVENT_SEQ = :V_EVENT_SEQ
+          AND (OWNER_SEQ = :V_OWNER_SEQ
+            OR EXISTS(SELECT 1
+                      FROM OWNER
+                      WHERE OWNER_SEQ = :V_OWNER_SEQ
+                        AND (ADMIN_YN = 'Y'
+                          OR ADMIN_YN = 'y')))
+    </select>
+    <update id="insert">
+        INSERT INTO EVENT(EVENT_SEQ,
+                          OWNER_SEQ,
+                          EVENT_TITLE,
+                          EVENT_CONTENT,
+                          EVENT_START,
+                          EVENT_END,
+                          ATTACH_PATH,
+                          ATTACH_FILE,
+                          IN_DATE,
+                          IN_USER_ID,
+                          UP_DATE,
+                          UP_USER_ID)
+        VALUES (EVENT_SEQ.NEXTVAL,
+                :V_OWNER_SEQ,
+                :V_EVENT_TITLE,
+                :V_EVENT_CONTENT,
+                :V_EVENT_START,
+                :V_EVENT_END,
+                :V_ATTACH_PATH,
+                :V_ATTACH_FILE,
+                TO_CHAR(SYSDATE, 'YYYYMMDD.HHMISS'),
+                :V_IN_USER_ID,
+                TO_CHAR(SYSDATE, 'YYYYMMDD.HHMISS'),
+                :V_UP_USER_ID)
+    </update>
+    <update id="update">
+        UPDATE EVENT
+        SET EVENT_TITLE   = :V_EVENT_TITLE,
+            EVENT_CONTENT = :V_EVENT_CONTENT,
+            EVENT_START   = :V_EVENT_START,
+            EVENT_END     = :V_EVENT_END,
+            ATTACH_PATH   = :V_ATTACH_PATH,
+            ATTACH_FILE   = :V_ATTACH_FILE,
+            UP_DATE       = TO_CHAR(SYSDATE, 'YYYYMMDD.HHMISS'),
+            UP_USER_ID    = :V_UP_USER_ID
+        WHERE EVENT_SEQ = :V_EVENT_SEQ
+          AND OWNER_SEQ = :V_OWNER_SEQ
+    </update>
+    
+    <update id="del_img">
+        update
+        	event
+       	set
+	        attach_path			= '',
+	        attach_file			= '',
+	        up_date				=to_char(sysdate, 'YYYYMMDD.HHMISS')
+         where
+         	owner_seq=:1
+         and
+            event_seq=:2
+
+    </update>
+    <update id="delete">
+        delete from event
+        where
+            owner_seq=:1
+        and
+            event_seq=:2
+        and
+            to_char(sysdate,('YYYYMMDD')) > to_char(event_end,('YYYYMMDD'))
+    </update>
+</mapper>

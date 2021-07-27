@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="User">
+    <select id="selectAll">
+        SELECT CATE_SEQ,
+               OWNER_SEQ,
+               CATE_NAME,
+               CATE_CONTENT,
+               CATE_DISPLAY_YN,
+               ATTACH_PATH,
+               ATTACH_FILE,
+               IN_DATE,
+               IN_USER_ID,
+               UP_DATE,
+               UP_USER_ID
+        FROM CATEGORY
+        WHERE OWNER_SEQ = :V_OWNER_SEQ 
+        ORDER BY CATE_SEQ
+    </select>
+
+    <select id="selectYList">
+        SELECT CATE_SEQ,
+               OWNER_SEQ,
+               CATE_NAME,
+               CATE_CONTENT,
+               CATE_DISPLAY_YN,
+               ATTACH_PATH,
+               ATTACH_FILE,
+               IN_DATE,
+               IN_USER_ID,
+               UP_DATE,
+               UP_USER_ID
+        FROM CATEGORY
+        WHERE OWNER_SEQ = :V_OWNER_SEQ
+          AND (CATE_DISPLAY_YN = 'Y'
+            OR CATE_DISPLAY_YN = 'y')
+    </select>
+
+    <select id="selectKiosk">
+        SELECT distinct C.CATE_SEQ,
+               C.OWNER_SEQ,
+               CATE_NAME,
+               CATE_CONTENT,
+               CATE_DISPLAY_YN,
+               C.ATTACH_PATH,
+               C.ATTACH_FILE,
+               C.IN_DATE,
+               C.IN_USER_ID,
+               C.UP_DATE,
+               C.UP_USER_ID
+        FROM MENU M
+                 INNER JOIN CATEGORY C ON M.CATE_SEQ = C.CATE_SEQ
+        WHERE M.OWNER_SEQ = :V_OWNER_SEQ
+          AND (MENU_DISPLAY_YN = 'Y'
+            OR MENU_DISPLAY_YN = 'y')
+          AND (CATE_DISPLAY_YN = 'Y'
+            OR CATE_DISPLAY_YN = 'y')
+        ORDER BY CATE_SEQ
+    </select>
+
+    <select id="select">
+        select 
+        	cate_seq,
+			owner_seq,
+			cate_name,
+			cate_content,
+			cate_display_yn,
+			attach_path,
+			attach_file,
+			in_date,
+			in_user_id,
+			up_date,
+			up_user_id
+        from 
+        	category
+        where 
+        	owner_seq = :v_owner_seq
+		and 
+			cate_seq = :v_cate_seq
+    </select>
+    
+<!-- ################## insert ################## -->
+    <update id="insert">
+    	insert into
+    		category
+		    	(
+					cate_seq,
+		    		owner_seq,
+					cate_name,
+					cate_content,
+					cate_display_yn,
+					attach_path,
+					attach_file,
+					in_date, 
+					in_user_id, 
+					up_date, 
+					up_user_id
+				)
+		values
+			(
+				CATE_SEQ.nextval, 
+				:1, 
+				:2, 
+				:3, 
+				:4, 
+				:5,
+				:6,
+				to_char(sysdate, 'YYYYMMDD.HH24MISS'), 
+				:7,
+				to_char(sysdate, 'YYYYMMDD.HH24MISS'), 
+				:8
+			)
+    </update>
+    
+<!-- ################## update ################## -->
+    <update id="update">
+		update
+    			category
+		set
+			owner_seq =:1,
+			cate_name =:2,
+			cate_content =:3,
+			cate_display_yn =:4,
+			attach_path =:5,
+			attach_file =:6,
+			up_date = to_char(sysdate, 'YYYYMMDD.HH24MISS'),
+			up_user_id =:7
+		where
+			cate_seq =:8
+    </update>
+<!-- ################## del_img ################## -->    
+    <update id="del_img">
+        update
+        	category
+       	set
+	        attach_path			= '',
+	        attach_file			= '',
+	        up_date				=to_char(sysdate, 'YYYYMMDD.HHMISS')
+         where
+         	cate_seq=:1
+    </update>
+</mapper>

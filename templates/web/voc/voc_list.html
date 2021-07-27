@@ -1,0 +1,67 @@
+{% extends 'web/layout.html' %}
+{% block content %}
+    <script>
+        $('span').each(function () {
+            if ($(this).html() === "고객소리함") {
+                $(this).parents('li').addClass('active');
+                return false;
+            }
+        });
+
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        })
+    </script>
+    <style>
+        td.con {
+            display: inline-block;
+            width: 400px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tooltip-inner {
+            background-color: #ffffff;
+            color: black;
+            border: 1px inset black;
+        }
+    </style>
+    <!-- Begin Page Content -->
+    <div class="container-fluid">
+        <!-- Content Row -->
+        <div class="row">
+            <div class="col-xl-12 col-lg-12">
+                <div class="card shadow mb-4">
+                    <!-- Card Header - Dropdown -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-dark">고객소리함</h6>
+                    </div>
+                    <!-- Card Body -->
+                    <div class="card-body">
+                        <br>
+                        <table class="table table-hover" style="text-align: center">
+                            <thead class="bg-warning font-weight-bold text-light">
+                            <tr>
+                                <th>순번</th>
+                                <th>내용</th>
+                                <th>등록일</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for i in list %}
+                                <tr class="menu">
+                                    <td>{{ len(list) - loop.index +1}}</td>
+                                    <td class="con" data-toggle="tooltip" data-placement="auto" title="{{ i.content }}">{{ i.content }}</td>
+                                    <td>{{ i.in_date }}</td>
+                                </tr>
+                                </tbody>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end of voc add Modal-->
+{% endblock %}

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="lib/bootstrap/4.6.0/css/bootstrap.min.css">
+    <link href="lib/SB-Admin-2/css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="lib/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <script src="lib/jquery/jquery-3.6.0.min.js"></script>
+    <script src="lib/bootstrap/4.6.0/js/bootstrap.bundle.min.js"></script>
+    <script src="lib/SB-Admin-2/js/sb-admin-2.min.js"></script>
+    <script>
+        function fn_find_pw() {
+            location.href = "find_pw"
+        }
+    </script>
+</head>
+<body>
+<br>
+<div class="container">
+    <!-- Outer Row -->
+    <div class="row justify-content-center">
+        <div class="col-xl-8 col-lg-8 col-md-8">
+            <div class="card o-hidden border-0 shadow-lg my-5">
+                <div class="card-body p-0">
+                    <!-- Nested Row within Card Body -->
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="p-5">
+                                <div class="text-center">
+                                    <h1 class="h4 text-gray-900 mb-4"><img src="downloads?path=uploads/img&file=logo_color.jpeg" widh="300px" height="150px"></h1>
+                                </div>
+                                <br>
+                                <form class="user" name="kiosk_login_form" action="kiosk_login" method="post">
+                                    <div class="form-group">
+                                        <input type="email" class="form-control form-control-user" name="owner_id" aria-describedby="emailHelp" placeholder="아이디를 입력하세요." value="za_or@naver.com">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="password" class="form-control form-control-user" name="owner_pwd" placeholder="Password" value="Asdf123!">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-user btn-block">
+                                        Login
+                                    </button>
+                                    <br>
+                                    <button type="button" class="btn btn-outline-success" onclick="fn_find_pw()">비밀번호 찾기</button>
+                                </form>
+                                <hr>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

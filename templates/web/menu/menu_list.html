@@ -1,0 +1,142 @@
+{% extends 'web/layout.html' %}
+
+{% block content %}
+<script>
+    $('span').each(function () {
+        if ($(this).html() === "메뉴 관리") {
+            $(this).parents('li').addClass('active');
+            return false;
+        }
+    });
+
+    $(document).ready(function () {
+        $('[data-toggle="popover"]').popover({
+            trigger: 'hover',
+            html: true,
+            content: function () {
+                return '<img class="img-fluid" src="' + $(this).data('img') + '" />';
+            }
+        });
+    });
+
+    function fn_menu_detail(ord) {
+        location.href = "menu_detail?ord=" + ord;
+    }
+</script>
+
+<!-- Begin Page Content -->
+<div class="container-fluid">
+    <!-- Content Row -->
+    <div class="row">
+        <div class="col-xl-12 col-lg-12">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-dark">메뉴 관리</h6>
+                </div>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div style="text-align: right">
+                        <button type="button" class="btn btn-outline-primary" onclick="location.href='multi_menu_add'">여러 메뉴 추가</button>
+                        <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#MenuAddModal">메뉴 하나 추가</button>
+                    </div>
+                    <br>
+                    <table class="table table-hover" style="text-align: center">
+                        <thead class="bg-warning font-weight-bold text-light">
+                        <tr>
+                            <th>메뉴 번호</th>
+                            <th>카테고리명</th>
+                            <th>메뉴</th>
+                            <th>가격</th>
+                            <th>이미지</th>
+                            <th>표시여부</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% if menu_list %}
+                        {% for menu in menu_list %}
+                        <tr onclick="location.href='menu_detail?menu_seq={{menu.menu_seq}}'">
+                            <td>{{loop.index}}</td>
+                            <td>{{menu.cate_name}}</td>
+                            <td>{{menu.menu_name}}</td>
+                            <td>{{menu.menu_price}}</td>
+                            <td>
+                                {% if menu.attach_file %}
+                                <img src="downloads?path=uploads/img&file=img.svg" alt="img" width="25px" height="auto" data-toggle="popover" data-img="downloads?path={{menu.attach_path}}&file={{menu.attach_file}}" data-placement="left">
+                                {% endif %}
+                            </td>
+                            {% if menu.menu_display_yn == 'Y' or menu.menu_display_yn =='y' %}
+                            <td>표시</td>
+                            {% else %}
+                            <td>비표시</td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="6">등록된 메뉴가 없습니다.</td>
+                        </tr>
+                        {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- menu modify Modal-->
+<div class="modal fade" id="MenuAddModal" tabindex="-1" role="dialog" aria-labelledby="MenuAddModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <form action="menu_add_form" method="post" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="MenuAddModalLabel">메뉴 하나 추가</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- menu modify Modal content -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card shadow mb-4">
+                                <div class="row text-center">
+                                    <div class="col-6"><p>카테고리명</p></div>
+                                    <div class="col-6">
+                                        <select class="form-control" name="cate_seq" required>
+                                            {% for category in categoryList %}
+                                            <option value="{{category.cate_seq}}">{{category.cate_name}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-6"><p>메뉴명</p></div>
+                                    <div class="col-6"><input type="text" class="form-control" name="menu_name" required></div>
+                                    <div class="col-6"><p>가격</p></div>
+                                    <div class="col-6"><input type="number" class="form-control" name="menu_price" min="0" required></div>
+                                    <div class="col-6"><p>설명</p></div>
+                                    <div class="col-6"><textarea class="form-control" name="menu_content" rows="5" cols="100" required></textarea></div>
+                                    <div class="col-6"><p>이미지</p></div>
+                                    <div class="col-6"><input type="file" name="file" class="form-control-file border"></div>
+                                    <div class="col-6"><p>공개여부</p></div>
+                                    <div class="col-3">
+                                        <label><input type="radio" name="menu_display_yn" value="y" checked> 공개</label>
+                                    </div>
+                                    <div class="col-3">
+                                        <label><input type="radio" name="menu_display_yn" value="n" required> 비공개</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end of menu modify  Modal content -->
+                </div>
+                <div style="text-align: right" class="modal-footer">
+                    <button type="submit" class="btn btn-outline-warning">추가하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- end of menu modify  Modal-->
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends 'web/layout.html' %}
+
+{% block content %}
+<style>
+    .container-fluid {
+        width: 100%;
+        text-align: center;
+    }
+
+    .card-body {
+        display: inline-block;
+    }
+</style>
+
+<!-- Begin Page Content -->
+<div class="container-fluid">
+    <!-- Content Row -->
+    <div class="row">
+        <div class="col-xl-12 col-lg-12">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0  font-weight-bold text-dark">마이페이지</h6>
+                </div>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <form class="user" method="post" enctype="multipart/form-data" name="register">
+                        <div class="form-group row">
+                            <div class="row col-xl-6 col-lg-8" style="margin-right: auto;margin-left: auto">
+                                <img src="downloads?path={{owner.logo_path}}&file={{owner.logo_file}}" class="rounded-circle col-12" alt="Cinque Terre" height="auto">
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="font-size: 20px">
+                            {{owner.owner_str_name}}
+                        </div>
+
+                        <div class="form-group" style="font-size: 20px">
+                            {{owner.owner_str_num}}
+                        </div>
+
+                        <div class="form-group" style="font-size: 20px">
+                            {{owner.owner_add1}}
+                            {{owner.owner_add2}}
+                        </div>
+
+                        <div class="form-group" style="font-size: 20px">
+                            {{owner.owner_str_tel}}
+                        </div>
+                        <hr>
+                        <div class="form-group" style="font-size: 20px">
+                            {{owner.owner_name}}
+                        </div>
+
+                        <div class="form-group" style="font-size: 20px">
+                            {{owner.owner_id}}
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

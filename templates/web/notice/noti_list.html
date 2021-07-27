@@ -1,0 +1,115 @@
+{% extends 'web/layout.html' %}
+
+{% block content %}
+<script>
+    $('span').each(function () {
+        if ($(this).html() === "공지사항") {
+            $(this).parents('li').addClass('active');
+            return false;
+        }
+    });
+
+    function fn_noti_detail(noti_seq) {
+        location.href = "noti_detail?noti_seq=" + noti_seq;
+    }
+
+    function fn_noti_add() {
+        if ($.trim($('input[name=noti_title]').val()).length >0 && $.trim($('textarea').val()).length > 0) {
+            document.noti_add_form.submit();
+        } else {
+            alert('작성되지 않은 항목이 있습니다.');
+        }
+    }
+</script>
+
+<!-- Begin Page Content -->
+<div class="container-fluid">
+    <!-- Content Row -->
+    <div class="row">
+        <div class="col-xl-12 col-lg-12">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-dark">공지사항</h6>
+                </div>
+                <!-- Card Body -->
+                <div class="card-body">
+                    {% if session.owner.admin_yn == "y" %}
+                    <div style="text-align: right">
+                        <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#NotiAddModal">추가</button>
+                    </div>
+                    {% endif %}
+                    <br>
+                    <table class="table table-hover" style="text-align: center">
+                        <thead class="bg-warning font-weight-bold text-light">
+                        <tr>
+                            <th>순번</th>
+                            <th>제목</th>
+                            <th>등록일</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for n in list %}
+                        <tr class="menu" onclick="fn_noti_detail('{{n.noti_seq}}')">
+                            <td>{{len_list-loop.index+1}}</td>
+                            <td>{{n.noti_title}}</td>
+                            <td>{{n.in_date}}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- notice modify Modal-->
+<div class="modal fade" id="NotiAddModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="NotiAddModalLabel">공지사항 추가</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- notice modify Modal content -->
+                <div class="row">
+                    <div class="col-xl-12 col-lg-12">
+                        <div class="card shadow mb-4">
+                            <!-- Card Header - Dropdown -->
+                            <form name="noti_add_form" action="noti_add" method="post" enctype="multipart/form-data">
+                                <table class="table" style="text-align: center">
+                                    <tr>
+                                        <th>제목</th>
+                                        <td><input type="text" name="noti_title" class="form-control" required></td>
+                                    </tr>
+                                    <tr>
+                                        <th>내용</th>
+                                        <td>
+                                            <textarea class="form-control" name="noti_content" rows="5" cols="100" required></textarea>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>첨부파일</th>
+                                        <td>
+                                            <input type="file" name="noti_file">
+                                        </td>
+                                    </tr>
+                                </table>
+                                <div style="text-align: right" class="modal-footer">
+                                    <button type="button" class="btn btn-outline-warning" onclick="fn_noti_add()">추가완료</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <!-- end of notice modify  Modal content -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end of notice add Modal-->
+{% endblock %}

@@ -1,0 +1,198 @@
+{% extends 'web/layout.html' %}
+
+{% block content %}
+    <script>
+        $('span').each(function () {
+            if ($(this).html() === "카테고리 관리") {
+                $(this).parents('li').addClass('active');
+                return false;
+            }
+        });
+        $(document).ready(function () {
+            $('[data-toggle="popover"]').popover({
+                trigger: 'hover',
+                html: true,
+                content: function () {
+                    return '<img class="img-fluid" src="' + $(this).data('img') + '" />';
+                }
+            });
+        });
+
+        $(function () {
+            $('#cate_content').html($('#cate_content').html().replaceAll('\r', '').replaceAll('\n', '<br>'))
+        })
+
+        function fn_cate_list() {
+            location.href = "cate_list"
+        }
+
+        function fn_cate_mod() {
+            document.cate_mod_form.submit()
+        }
+
+        function fn_cate_img_del() {
+            var cate_seq = "{{cate.cate_seq}}"
+
+            var param = "";
+            param += "dummy=" + Math.random();
+            param += "&cate_seq=" + cate_seq;
+
+            $.ajax({
+                type: "post",
+                url: "cate_del_img.ajax",
+                dataType: "json",
+                data: param,
+                error: function () {
+                    alert('통신 불가');
+                },
+                success: function (data) {
+                    if (data.msg == 'ok') {
+                        $('#attach').next().removeClass('invisible')
+                        $('#attach').remove();
+                    } else {
+                        alert('삭제 도중 문제가 발생하였습니다.');
+                    }
+                }
+            });
+
+            $('input[name=attach_path]').val('');
+            $('input[name=attach_file]').val('');
+        }
+    </script>
+    <!-- Begin Page Content -->
+    <div class="container-fluid">
+        <!-- Content Row -->
+        <div class="row">
+            <div class="col-xl-12 col-lg-12">
+                <div class="card shadow mb-4">
+                    <!-- Card Header - Dropdown -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-dark">카테고리 관리</h6>
+                    </div>
+                    <!-- Card Body -->
+                    <div class="card-body">
+                        <br>
+                        <table class="table" style="text-align: center">
+                            <tr>
+                                <th>순번</th>
+                                <td>{{ cate.cate_seq }}</td>
+                            </tr>
+                            <tr>
+                                <th>카테고리명</th>
+                                <td>{{ cate.cate_name }}</td>
+                            </tr>
+                            {% if cate.attach_file %}
+                                <tr>
+                                    <th>상세이미지</th>
+                                    <td>
+                                        <img src="downloads?path={{ cate.attach_path }}&file={{ cate.attach_file }}" width="200px" height="200px">
+                                    </td>
+                                </tr>
+                            {% endif %}
+                            {% if cate.cate_content %}
+                                <tr>
+                                    <th>설명</th>
+                                    <td id="cate_content">{{ cate.cate_content }}</td>
+                                </tr>
+                            {% endif %}
+                            <tr>
+                                <th>공개여부</th>
+                                {% if cate.cate_display_yn == "y" %}
+                                    <td>표시</td>
+                                {% else %}
+                                    <td>비표시</td>
+                                {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                        <div style="text-align: right">
+                            <button type="button" class="btn btn-outline-success" onclick="fn_cate_list()">목록</button>
+                            <button type="button" class="btn btn-outline-warning" data-toggle="modal" data-target="#CateModModal">수정</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- category modify Modal-->
+
+    <div class="modal fade" id="CateModModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="CateModalLabel">카테고리 수정</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- category modify Modal content -->
+                    <div class="row">
+                        <div class="col-xl-12 col-lg-12">
+                            <div class="card shadow mb-4">
+                                <!-- Card Header - Dropdown -->
+                                <form name="cate_mod_form" action="cate_mod" method="post" enctype="multipart/form-data">
+                                    <input type="hidden" name="cate_seq" value="{{ cate.cate_seq }}">
+                                    <input type="hidden" name="attach_path" value="{{ cate.attach_path }}">
+                                    <input type="hidden" name="attach_file" value="{{ cate.attach_file }}">
+                                    <table class="table" style="text-align: center">
+                                        <tr>
+                                            <th>순번</th>
+                                            <td>{{ cate.cate_seq }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>카테고리명</th>
+                                            <td><input name="cate_name" type="text" class="form-control" value="{{ cate.cate_name }}"></td>
+                                        </tr>
+                                        <tr>
+                                            <th>설명</th>
+                                            {% if cate.cate_content %}
+                                                <td>
+                                                    <textarea name="cate_content" class="form-control" rows="5" cols="100">{{ cate.cate_content }}</textarea>
+                                                </td>
+                                            {% else %}
+                                                <td>
+                                                    <textarea name="cate_content" class="form-control" rows="5" cols="100"></textarea>
+                                                </td>
+                                            {% endif %}
+                                        </tr>
+                                        <tr>
+                                            <th>첨부파일</th>
+                                            <td>
+                                                {% if cate.attach_file %}
+                                                    <a id="attach" href="javascript:fn_cate_img_del()">{{ cate.attach_file }} x</a>
+                                                    <input type="file" class="form-control-file border invisible" name="cate_file">
+                                                {% else %}
+                                                    <input type="file" class="form-control-file border" name="cate_file">
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>공개여부</th>
+                                            <td>
+                                                {% if cate.cate_display_yn == 'y' %}
+                                                    <input type="radio" name="cate_display_yn" value="y" checked required> 표시
+                                                    <input type="radio" name="cate_display_yn" value="n" required> 비표시
+                                                {% else %}
+                                                    <input type="radio" name="cate_display_yn" value="y" required> 표시
+                                                    <input type="radio" name="cate_display_yn" value="n" checked required> 비표시
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end of category modify Modal content -->
+                </div>
+                <div style="text-align: right" class="modal-footer">
+                    <button type="button" class="btn btn-outline-warning" data-dismiss="modal" onclick="fn_cate_mod()">수정 완료</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end of category modify Modal-->
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends 'web/layout.html' %}
+
+{% block content %}
+
+    <script>
+        $('span').each(function () {
+            if ($(this).html() === "메뉴 관리") {
+                $(this).parents('li').addClass('active');
+                return false;
+            }
+        });
+
+        let menunum = 0
+
+        function add_menu() {
+            menunum += 1
+            let div = ''
+            div += '                                <div class="row" id="menu_' + menunum + '">\n'
+            div += '                                    <p class="col-12"></p>\n'
+            div += '                                    <div class="col-2">\n'
+            div += '                                        <select class="form-control" name="cateseq_' + menunum + '" required>\n'
+            {% for category in categoryList %}
+                div += '                                            <option value="{{category.cate_seq}}">{{category.cate_name}}</option>\n'
+            {% endfor %}
+            div += '                                        </select>\n'
+            div += '                                    </div>\n'
+            div += '                                    <div class="col-2"><input type="text" class="form-control" name="menuname_' + menunum + '" required></div>\n'
+            div += '                                    <div class="col-2"><input type="number" class="form-control" name="menu_price_' + menunum + '" min="0" required></div>\n'
+            div += '                                    <div class="col-2"><input type="text" class="form-control" name="menu_content_' + menunum + '" required></div>\n'
+            div += '                                    <div class="col-2"><input type="file" name="file_' + menunum + '" class="form-control-file border" required></div>\n'
+            div += '                                    <div class="col-1">\n'
+            div += '                                        <select class="form-control" name="menu_display_yn_' + menunum + '" required>\n'
+            div += '                                            <option value="y" selected>공개</option>\n'
+            div += '                                            <option value="n">비공개</option>\n'
+            div += '                                        </select>\n'
+            div += '                                    </div>\n'
+            div += '                                    <div class="col-1"><button type="button" class="btn btn-outline-danger" onclick="menu_del(' + menunum + ')">×</button></div>\n'
+            div += '                                </div>'
+            $('#menuList').append(div)
+        }
+
+        function menu_del(num) {
+            $('#menu_' + num).remove()
+        }
+    </script>
+
+    <!-- Begin Page Content -->
+    <div class="container-fluid">
+        <!-- Content Row -->
+        <div class="row">
+            <div class="col-xl-12 col-lg-12">
+                <div class="card shadow mb-4">
+                    <!-- Card Header - Dropdown -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-dark">여러 메뉴 추가</h6>
+                    </div>
+                    <!-- Card Body -->
+                    <form action="multi_menu_add_form" method="post" enctype="multipart/form-data">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="text-center" id="menuList">
+                                        <div class="row">
+                                            <div class="col-2"><p>카테고리명</p></div>
+                                            <div class="col-2"><p>메뉴명</p></div>
+                                            <div class="col-2"><p>가격</p></div>
+                                            <div class="col-2"><p>설명</p></div>
+                                            <div class="col-2"><p>이미지</p></div>
+                                            <div class="col-1"><p>공개여부</p></div>
+                                            <div class="col-1"></div>
+                                        </div>
+                                        <div class="row" id="menu_0">
+                                            <div class="col-2">
+                                                <select class="form-control" name="cateseq_0" required>
+                                                    {% for category in categoryList %}
+                                                        <option value="{{ category.cate_seq }}">{{ category.cate_name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="col-2"><input type="text" class="form-control" name="menuname_0" required></div>
+                                            <div class="col-2"><input type="number" class="form-control" name="menu_price_0" min="0" required></div>
+                                            <div class="col-2"><input type="text" class="form-control" name="menu_content_0" required></div>
+                                            <div class="col-2"><input type="file" name="file_0" class="form-control-file border" required></div>
+                                            <div class="col-1">
+                                                <select class="form-control" name="menu_display_yn_0" required>
+                                                    <option value="y" selected>공개</option>
+                                                    <option value="n">비공개</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-1">
+                                                <button type="button" class="btn btn-outline-primary" onclick="add_menu()">+</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- end of menu modify  Modal content -->
+                        </div>
+                        <div style="text-align: right" class="modal-footer">
+                            <button type="button" onclick="location.href='menu_list'" class="btn btn-outline-secondary">목록으로</button>
+                            <button type="submit" class="btn btn-outline-warning">추가하기</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

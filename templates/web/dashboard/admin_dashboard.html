@@ -1,0 +1,120 @@
+{% extends 'web/layout.html' %}
+{% block content %}
+
+    <script>
+        $('span').each(function () {
+            if ($(this).html() === "Dashboard") {
+                $(this).parents('li').addClass('active');
+                return false;
+            }
+        });
+
+        $(function () {
+            google.charts.load('current', {'packages': ['corechart']});
+            google.charts.setOnLoadCallback(drawChart);
+
+            function drawChart() {
+                var data = google.visualization.arrayToDataTable([
+                    ['일', '가입자 수'],
+                    {% for daychart in dayschart %}
+                        ['{{daychart.tr_in_date[-2:]}}', {{daychart.own_cnt}}],
+                    {% endfor %}
+                ])
+                var options = {
+                    hAxis: {title: '일', titleTextStyle: {color: '#333'}},
+                    vAxis: {minValue: 0},
+                    legend: {position: 'top'},
+                    lineWidth: 3,
+                    colors: ['#ffc400']
+                };
+                var chart = new google.visualization.LineChart(document.getElementById('dayschart'));
+                chart.draw(data, options);
+
+                //6개월 가입자 수
+
+                data = google.visualization.arrayToDataTable([
+                    ['월', '가입자 수'],
+                    {% for monthchart in monthschart %}
+                        ['{{monthchart.tr_in_date[-2:]}}', {{monthchart.own_cnt}}],
+                    {% endfor %}
+                ])
+                options = {
+                    hAxis: {title: '월', titleTextStyle: {color: '#333'}},
+                    vAxis: {minValue: 0},
+                    legend: {position: 'top'},
+                    lineWidth: 3,
+                    colors: ['#4bc0c0']
+
+                };
+                chart = new google.visualization.LineChart(document.getElementById('monthschart'));
+                chart.draw(data, options);
+
+
+                //1년 가입자 수
+
+                data = google.visualization.arrayToDataTable([
+                    ['월', '가입자 수'],
+                    {% for yearchart in yearschart %}
+                        ['{{yearchart.tr_in_date[-2:]}}', {{yearchart.own_cnt}}],
+                    {% endfor %}
+                ])
+                options = {
+                    hAxis: {title: '월', titleTextStyle: {color: '#333'}},
+                    vAxis: {minValue: 0},
+                    legend: {position: 'top'},
+                    lineWidth: 3,
+                    colors: ['#ac0800']
+                };
+                chart = new google.visualization.LineChart(document.getElementById('yearchart'));
+                chart.draw(data, options);
+            }
+        });
+    </script>
+
+    <!-- 관리자 차트  -->
+    <div class="container-fluid">
+        <!-- Content Row -->
+        <div class="row">
+            <!-- Pie Chart -->
+            <div class="col-xl-6">
+                <div class="card shadow mb-4 w-100">
+                    <!-- Card Header - Dropdown -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-dark">한달 동안 가입한 회원 수</h6>
+                    </div>
+                    <!-- Card Body -->
+                    <div class="card-body w-100">
+                        <div id="dayschart" class="w-100"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pie Chart -->
+            <div class="col-xl-6">
+                <div class="card shadow mb-4">
+                    <!-- Card Header - Dropdown -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-dark">최근 6개월 가입자 추이</h6>
+                    </div>
+                    <!-- Card Body -->
+                    <div class="card-body w-100">
+                        <div id="monthschart" class="w-100"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- Area Chart -->
+            <div class="col-12">
+                <div class="card shadow mb-4">
+                    <!-- Card Header - Dropdown -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-dark">최근 1년 가입자 추이</h6>
+                    </div>
+                    <!-- Card Body -->
+                    <div class="card-body w-100">
+                        <div id="yearchart" class="w-100"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="lib/bootstrap/4.6.0/css/bootstrap.min.css">
+    <link href="lib/SB-Admin-2/css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="lib/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <script src="lib/jquery/jquery-3.6.0.min.js"></script>
+    <script src="lib/bootstrap/4.6.0/js/bootstrap.bundle.min.js"></script>
+    <script src="lib/Chart.js/3.0.2/chart.min.js"></script>
+    <script src="lib/SB-Admin-2/js/sb-admin-2.min.js"></script>
+
+    <style>
+        div#main {
+            height: 100%;
+            background-image: url("downloads?path={{logo_path}}&file={{logo_file}}");
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-position: center;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        html, body {
+            margin: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body onclick="location.href='kiosk_menu'">
+<div class="container-sm" style="text-align: center" id="main">
+</div>
+{% for i in list %}
+<div>
+    <img src="downlaods?path={{i.attach_path}}&file={{i.attach_file}}">
+</div>
+{% endfor %}
+<br>
+</body>
+</html>

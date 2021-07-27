@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="User">
+    <select id="genBuySeq">
+		SELECT BUY_SEQ.NEXTVAL
+		FROM DUAL
+    </select>
+    <select id="select">
+		SELECT BUY_SEQ,
+			   MENU_SEQ,
+			   BUY_CNT,
+			   IN_DATE,
+			   IN_USER_ID,
+			   UP_DATE,
+			   UP_USER_ID
+		FROM BUY
+		WHERE BUY_SEQ = :V_BUY_SEQ
+    </select>
+    <select id="store_sales">
+        SELECT o.owner_str_name,
+               SUM(b.BUY_CNT * m.MENU_PRICE)
+        FROM owner o, menu m , buy b 
+        WHERE o.owner_seq = m.owner_seq
+          AND b.menu_seq = m.menu_seq
+          AND TO_CHAR(TO_DATE(B.IN_DATE, 'YYYYMMDD.HH24MISS'), 'YYYY-MM')  =  TO_CHAR(SYSDATE, 'YYYY-MM')
+        GROUP BY o.owner_seq , o.owner_str_name 
+    </select>
+    
+    
+    <update id="insert">
+		INSERT INTO BUY(BUY_SEQ,
+						MENU_SEQ,
+						BUY_CNT,
+						IN_DATE,
+						IN_USER_ID,
+						UP_DATE,
+						UP_USER_ID)
+		VALUES (:V_BUY_SEQ,
+				:V_MENU_SEQ,
+				:V_BUY_CNT,
+				'20201213.193604',
+				:V_IN_USER_ID,
+				TO_CHAR(SYSDATE, 'YYYYMMDD.HH24MISS'),
+				:V_UP_USER_ID)
+    </update>
+    <update id="delete">
+        DELETE
+		FROM BUY
+		WHERE BUY_SEQ = :V_BUY_SEQ
+		  AND MENU_SEQ = :V_MENU_SEQ
+    </update>
+
+	<select id="sixMonthStoreSales">
+		<![CDATA[
+		SELECT O.OWNER_SEQ,
+			   OWNER_STR_NAME,
+			   DT,
+			   NVL(SUM(BUY_CNT * MENU_PRICE), 0)
+		FROM (SELECT DT,
+					 OWNER_SEQ,
+					 OWNER_STR_NAME
+			  FROM (SELECT TO_CHAR(ADD_MONTHS(SYSDATE, 1 - LEVEL), 'YYYY-MM') AS DT
+					FROM DUAL
+					CONNECT BY LEVEL <= 6)
+					   CROSS JOIN (SELECT OWNER_SEQ,
+										  OWNER_STR_NAME
+								   FROM OWNER
+								   WHERE ADMIN_YN != 'Y'
+									 AND ADMIN_YN != 'y')) O
+				 LEFT OUTER JOIN (SELECT MENU.OWNER_SEQ,
+										 BUY_CNT,
+										 MENU_PRICE,
+										 BUY.IN_DATE
+								  FROM MENU
+										   INNER JOIN BUY on MENU.MENU_SEQ = BUY.MENU_SEQ) M
+								 ON (M.OWNER_SEQ = O.OWNER_SEQ
+									 AND O.DT = TO_CHAR(TO_DATE(M.IN_DATE, 'YYYY-MM-DD.HH24MISS'), 'YYYY-MM'))
+		GROUP BY O.OWNER_SEQ,
+				 OWNER_STR_NAME,
+				 DT
+		ORDER BY O.OWNER_SEQ,
+				 OWNER_STR_NAME,
+				 DT
+        ]]>
+    </select>
+</mapper>

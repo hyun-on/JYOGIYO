@@ -1,0 +1,214 @@
+{% extends 'web/layout.html' %} {% block content %}
+    <script>
+        $('span').each(function () {
+            if ($(this).html() === "공지사항") {
+                $(this).parents('li').addClass('active');
+                return false;
+            }
+        });
+
+        $(document).ready(
+            function () {
+                $('[data-toggle="popover"]').popover(
+                    {
+                        trigger: 'hover',
+                        html: true,
+                        content: function () {
+                            return '<img class="img-fluid" src="'
+                                + $(this).data('img') + '" />';
+                        }
+                    });
+            });
+
+        $(function () {
+            $('#noti_content').html(
+                $('#noti_content').html().replaceAll('\r', '').replaceAll('\n',
+                    '<br>'))
+        })
+
+        function fn_noti_list() {
+            location.href = "noti_list"
+        }
+
+        function fn_noti_mod() {
+            if ($.trim($('input[name=noti_title]').val()).length > 0 && $.trim($('textarea').val()).length > 0) {
+                document.noti_mod_form.submit();
+            } else {
+                alert('작성되지 않은 항목이 있습니다.');
+            }
+            
+            var noti_seq = "{{noti.noti_seq}}"
+
+                var param = "";
+                param += "dummy=" + Math.random();
+                param += "&noti_seq=" + noti_seq;
+
+                $.ajax({
+                    type: "post",
+                    url: "noti_del_img.ajax",
+                    dataType: "json",
+                    data: param,
+                    error: function () {
+                        alert('통신 실패!!');
+                    },
+                    success: function (data) {
+                        if (data.msg == 'ok') {
+                        	
+                        } else {
+                            alert('삭제 실패!!');
+                        }
+                    }
+                });
+ 
+            
+        }
+
+        function fn_noti_del() {
+            location.href = "noti_del?noti_seq={{noti.noti_seq}}"
+        }
+
+        
+        function fn_noti_img_del() {
+        	$('#attach').next().removeClass('invisible')
+            $('#attach').remove();
+        	
+            $('input[name=attach_path]').val('');
+            $('input[name=attach_file]').val('');
+        }
+    </script>
+
+
+    <!-- Begin Page Content -->
+    <div class="container-fluid">
+        <!-- Content Row -->
+        <div class="row">
+            <div class="col-xl-12 col-lg-12">
+                <div class="card shadow mb-4">
+                    <!-- Card Header - Dropdown -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-dark">공지사항</h6>
+                    </div>
+                    <!-- Card Body -->
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-4"><p><b>제목</b></p></div>
+                            <div class="col-8"><p>{{ noti.noti_title }}</div>
+
+                            <div class="col-4"><p><b>등록일</b></p></div>
+                            <div class="col-8"><p>{{ noti.in_date }}</div>
+
+                            <div class="col-4"><p><b>내용</b></p></div>
+                            <div class="col-8" id="noti_content"><p>{{ noti.noti_content }}</div>
+
+                            {% if noti.attach_file %}
+                                <div class="col-4"><p><b>이미지</b></p></div>
+                                <div class="col-8 row">
+                                    <a href="downloads?path={{ noti.attach_path }}&file={{ noti.attach_file }}" target="_blank">
+                                        <img class="col-12 h-auto" src="downloads?path={{ noti.attach_path }}&file={{ noti.attach_file }}" width="500px" height="500px">
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div style="text-align: right">
+                            <button type="button" class="btn btn-outline-success" onclick="fn_noti_list()">목록</button>
+
+                            <!-- 관리자만 볼수있음 -->
+                            {% if session.owner.admin_yn == 'Y' or session.owner.admin_yn == 'y' %}
+                                <button type="button" class="btn btn-outline-warning" data-toggle="modal" data-target="#NotiModModal">수정</button>
+                                <button type="button" class="btn btn-outline-danger" data-toggle="modal" data-target="#NotiDelModal">삭제</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- notice modify Modal-->
+    <div class="modal fade" id="NotiModModal" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="NotiModModalLabel">공지사항 수정</h5>
+                    <button class="close" type="button" data-dismiss="modal"
+                            aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- notice modify Modal content -->
+                    <div class="row">
+                        <div class="col-xl-12 col-lg-12">
+                            <div class="card shadow mb-4">
+                                <!-- Card Header - Dropdown -->
+                                <form name="noti_mod_form" action="noti_mod" method="post"
+                                      enctype="multipart/form-data">
+                                    <input type="hidden" name="noti_seq" value="{{ noti.noti_seq }}">
+                                    <input type="hidden" name="attach_path" value="{{ noti.attach_path }}">
+                                    <input type="hidden" name="attach_file" value="{{ noti.attach_file }}">
+                                    <table class="table" style="text-align: center">
+                                        <tr>
+                                            <th>순번</th>
+                                            <td>{{ noti.note_seq }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>제목</th>
+                                            <td><input type="text" name="noti_title" class="form-control" value="{{ noti.noti_title }}" required></td>
+                                        </tr>
+                                        <tr>
+                                            <th>내용</th>
+                                            <td><textarea name="noti_content" class="form-control" rows="5" cols="100" required>{{ noti.noti_content }}</textarea></td>
+                                        </tr>
+                                        <tr>
+                                            <th>첨부파일</th>
+                                            <td>
+                                                {% if noti.attach_file %}
+                                                    <a id="attach" href="javascript:fn_noti_img_del()">{{ noti.attach_file }} x </a>
+                                                    <input type="file" class="form-control-file border invisible" name="noti_file">
+                                                {% else %}
+                                                    <input type="file" class="form-control-file border" name="noti_file">
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end of notice modify  Modal content -->
+                </div>
+                <div style="text-align: right" class="modal-footer">
+                    <button type="button" class="btn btn-outline-warning" onclick="fn_noti_mod()">수정 완료
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end of notice modify  Modal-->
+
+ <!-- notice delete Modal-->
+    <div class="modal fade" id="NotiDelModal" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="NotiDelModalLabel">공지사항을 삭제 하시겠습니까?</h5>
+                    <button class="close" type="button" data-dismiss="modal"
+                            aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">하단의 "삭제" 버튼을 누르시면 삭제됩니다.</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger"
+                            data-dismiss="modal" onclick="fn_noti_del()">삭제
+                    </button>
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end of notice modify Modal-->
+{% endblock %}

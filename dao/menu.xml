@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Menu">
+    <select id="selectAll">
+        SELECT MENU_SEQ,
+               M.OWNER_SEQ,
+               M.CATE_SEQ,
+               MENU_NAME,
+               MENU_PRICE,
+               MENU_CONTENT,
+               MENU_DISPLAY_YN,
+               M.ATTACH_PATH,
+               M.ATTACH_FILE,
+               M.IN_DATE,
+               M.IN_USER_ID,
+               M.UP_DATE,
+               M.UP_USER_ID,
+               C.CATE_NAME
+        FROM MENU M
+                 INNER JOIN CATEGORY C ON M.CATE_SEQ = C.CATE_SEQ
+        WHERE M.OWNER_SEQ = :V_OWNER_SEQ
+          AND (CATE_DISPLAY_YN = 'Y'
+            OR CATE_DISPLAY_YN = 'y')
+        ORDER BY MENU_SEQ
+    </select>
+    <select id="selectKiosk">
+        SELECT MENU_SEQ,
+               M.OWNER_SEQ,
+               M.CATE_SEQ,
+               MENU_NAME,
+               MENU_PRICE,
+               MENU_CONTENT,
+               MENU_DISPLAY_YN,
+               M.ATTACH_PATH,
+               M.ATTACH_FILE,
+               M.IN_DATE,
+               M.IN_USER_ID,
+               M.UP_DATE,
+               M.UP_USER_ID,
+               C.CATE_NAME
+        FROM MENU M
+                 INNER JOIN CATEGORY C ON M.CATE_SEQ = C.CATE_SEQ
+        WHERE M.OWNER_SEQ = :V_OWNER_SEQ
+          AND C.CATE_SEQ = :V_CATE_SEQ
+          AND (MENU_DISPLAY_YN = 'Y'
+            OR MENU_DISPLAY_YN = 'y')
+          AND (CATE_DISPLAY_YN = 'Y'
+            OR CATE_DISPLAY_YN = 'y')
+        ORDER BY MENU_SEQ
+    </select>
+    <select id="selectByName">
+        SELECT MENU_SEQ,
+               M.OWNER_SEQ,
+               M.CATE_SEQ,
+               MENU_NAME,
+               MENU_PRICE,
+               MENU_CONTENT,
+               MENU_DISPLAY_YN,
+               M.ATTACH_PATH,
+               M.ATTACH_FILE,
+               M.IN_DATE,
+               M.IN_USER_ID,
+               M.UP_DATE,
+               M.UP_USER_ID,
+               C.CATE_NAME
+        FROM MENU M
+                 INNER JOIN CATEGORY C ON M.CATE_SEQ = C.CATE_SEQ
+        WHERE (MENU_DISPLAY_YN = 'Y'
+            OR MENU_DISPLAY_YN = 'y')
+          AND (CATE_DISPLAY_YN = 'Y'
+            OR CATE_DISPLAY_YN = 'y')
+          AND M.OWNER_SEQ = :V_OWNER_SEQ
+          AND REPLACE(MENU_NAME, ' ') LIKE '%' || REPLACE(:V_MENU_NAME, ' ') || '%'
+        ORDER BY MENU_SEQ
+    </select>
+    <select id="selectKakao">
+        SELECT MENU_SEQ,
+               M.OWNER_SEQ,
+               M.CATE_SEQ,
+               MENU_NAME,
+               MENU_PRICE,
+               MENU_CONTENT,
+               MENU_DISPLAY_YN,
+               M.ATTACH_PATH,
+               M.ATTACH_FILE,
+               M.IN_DATE,
+               M.IN_USER_ID,
+               M.UP_DATE,
+               M.UP_USER_ID,
+               C.CATE_NAME
+        FROM MENU M
+                 INNER JOIN CATEGORY C ON M.CATE_SEQ = C.CATE_SEQ
+        WHERE M.OWNER_SEQ = :V_OWNER_SEQ
+          AND (MENU_DISPLAY_YN = 'Y'
+            OR MENU_DISPLAY_YN = 'y')
+          AND (CATE_DISPLAY_YN = 'Y'
+            OR CATE_DISPLAY_YN = 'y')
+        ORDER BY MENU_SEQ
+    </select>
+    <select id="select">
+        SELECT MENU_SEQ,
+               M.OWNER_SEQ,
+               M.CATE_SEQ,
+               MENU_NAME,
+               MENU_PRICE,
+               MENU_CONTENT,
+               MENU_DISPLAY_YN,
+               M.ATTACH_PATH,
+               M.ATTACH_FILE,
+               M.IN_DATE,
+               M.IN_USER_ID,
+               M.UP_DATE,
+               M.UP_USER_ID,
+               C.CATE_NAME
+        FROM MENU M
+                 INNER JOIN CATEGORY C ON M.CATE_SEQ = C.CATE_SEQ
+        WHERE M.MENU_SEQ = :V_MENU_SEQ
+          AND M.OWNER_SEQ = :V_OWNER_SEQ
+          AND (CATE_DISPLAY_YN = 'Y'
+            OR CATE_DISPLAY_YN = 'y')
+    </select>
+    <update id="insert">
+        INSERT INTO MENU(MENU_SEQ,
+                         OWNER_SEQ,
+                         CATE_SEQ,
+                         MENU_NAME,
+                         MENU_PRICE,
+                         MENU_CONTENT,
+                         MENU_DISPLAY_YN,
+                         ATTACH_PATH,
+                         ATTACH_FILE,
+                         IN_DATE,
+                         IN_USER_ID,
+                         UP_DATE,
+                         UP_USER_ID)
+        VALUES (MENU_SEQ.NEXTVAL,
+                :V_OWNER_SEQ,
+                :V_CATE_SEQ,
+                :V_MENU_NAME,
+                :V_MENU_PRICE,
+                :V_MENU_CONTENT,
+                :V_MENU_DISPLAY_YN,
+                :V_ATTACH_PATH,
+                :V_ATTACH_FILE,
+                TO_CHAR(SYSDATE, 'YYYYMMDD.HH24MISS'),
+                :V_IN_USER_ID,
+                TO_CHAR(SYSDATE, 'YYYYMMDD.HH24MISS'),
+                :V_UP_USER_ID)
+    </update>
+    <update id="update">
+        UPDATE MENU
+        SET CATE_SEQ        = :V_CATE_SEQ,
+            MENU_NAME       = :V_MENU_NAME,
+            MENU_PRICE      = :V_MENU_PRICE,
+            MENU_CONTENT    = :V_MENU_CONTENT,
+            MENU_DISPLAY_YN = :V_MENU_DISPLAY_YN,
+            ATTACH_PATH     = :V_ATTACH_PATH,
+            ATTACH_FILE     = :V_ATTACH_FILE,
+            UP_DATE         = TO_CHAR(SYSDATE, 'YYYYMMDD.HH24MISS'),
+            UP_USER_ID      = :V_UP_USER_ID
+        WHERE MENU_SEQ = :V_MENU_SEQ
+    </update>
+
+    <select id="menuCntChart">
+        <![CDATA[
+        SELECT BUY.MENU_SEQ,
+               MENU.MENU_NAME,
+               SUM(BUY_CNT) AS CNT
+        FROM BUY
+                 INNER JOIN MENU ON BUY.MENU_SEQ = MENU.MENU_SEQ
+        WHERE OWNER_SEQ = :V_OWNER_SEQ
+          AND TO_CHAR(TO_DATE(BUY.IN_DATE, 'YYYYMMDD.HH24MISS'), 'YYYY-MM') = :V_IN_DATE
+        GROUP BY BUY.MENU_SEQ,
+                 MENU.MENU_NAME
+        ORDER BY CNT DESC
+        ]]>
+    </select>
+
+    <select id="menuSalesChart">
+    <![CDATA[
+        SELECT BUY.MENU_SEQ,
+               MENU.MENU_NAME,
+               SUM(BUY_CNT * MENU_PRICE) AS SALES
+        FROM BUY
+                 INNER JOIN MENU ON BUY.MENU_SEQ = MENU.MENU_SEQ
+        WHERE OWNER_SEQ = :V_OWNER_SEQ
+          AND TO_CHAR(TO_DATE(BUY.IN_DATE, 'YYYYMMDD.HH24MISS'), 'YYYY-MM') = :V_IN_DATE
+        GROUP BY BUY.MENU_SEQ,
+                 MENU.MENU_NAME
+        ORDER BY SALES DESC
+        ]]>
+    </select>
+
+    <select id="salesChart">
+    <![CDATA[
+        SELECT DT,
+               NVL(SUM(BUY_CNT * MENU_PRICE), 0) AS SALES
+        FROM (SELECT BUY.IN_DATE, BUY_CNT, MENU_PRICE
+              FROM BUY
+                       INNER JOIN MENU
+                                  ON BUY.MENU_SEQ = MENU.MENU_SEQ
+              WHERE OWNER_SEQ = :V_OWNER_SEQ)
+                 RIGHT OUTER JOIN (
+            SELECT TO_CHAR(ADD_MONTHS(SYSDATE, 1 - LEVEL), 'YYYY-MM') AS DT
+            FROM DUAL
+            CONNECT BY LEVEL <= :V_LEVEL)
+                                  ON TO_CHAR(TO_DATE(IN_DATE, 'YYYYMMDD.HH24MISS'), 'YYYY-MM') = DT
+        GROUP BY DT
+        ORDER BY DT
+        ]]>
+    </select>
+</mapper>

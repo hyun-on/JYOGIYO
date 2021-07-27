@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Owner">
+    <select id="owner_seq_gen">
+        select owner_seq.nextval
+        from dual
+    </select>
+    <select id="selectAll">
+        select
+		        owner_seq,
+		        owner_name,
+		        owner_id,
+		        owner_pwd,
+		        owner_str_name,
+		        owner_str_num,
+		        owner_str_tel,
+		        owner_add1,
+		        owner_add2,
+		        logo_path,
+		        logo_file,
+		        admin_yn,
+		        in_date,
+		        in_user_id,
+		        up_date,
+		        up_user_id
+        from
+        		owner
+    </select>
+    <select id="select">
+        select
+		        owner_seq,
+		        owner_name,
+		        owner_id,
+		        owner_pwd,
+		        owner_str_name,
+		        owner_str_num,
+		        owner_str_tel,
+		        owner_add1,
+		        owner_add2,
+		        logo_path,
+		        logo_file,
+		        admin_yn,
+		        in_date,
+		        in_user_id,
+		        up_date,
+		        up_user_id
+        from
+        		owner
+        where
+        		owner_seq = :1
+    </select>
+    <select id="select_login">
+        select
+		        owner_seq,
+		        owner_name,
+		        owner_id,
+		        owner_pwd,
+		        owner_str_name,
+		        owner_str_num,
+		        owner_str_tel,
+		        owner_add1,
+		        owner_add2,
+		        logo_path,
+		        logo_file,
+		        admin_yn,
+		        in_date,
+		        in_user_id,
+		        up_date,
+		        up_user_id
+        from
+       			owner
+        where
+        		owner_id = :1
+        and
+        		owner_pwd =:2
+    </select>
+    <update id="insert">
+        insert into owner
+        (
+	        owner_seq,
+	        owner_name,
+	        owner_id,
+	        owner_pwd,
+	        owner_str_name,
+	
+	        owner_str_num,
+	        owner_str_tel,
+	        owner_add1,
+	        owner_add2,
+	
+	        logo_path,
+	        logo_file,
+	
+	        in_date,
+	        in_user_id,
+	        up_date,
+	        up_user_id	
+        )
+        values
+        (
+	        :1,
+	        :2,
+	        :3,
+	        :4,
+	        :5,
+	        :6,
+	        :7,
+	        :8,
+	        :9,
+	        :10,
+	        :11,
+	        to_char(sysdate, 'YYYYMMDD.HH24MISS'),
+	        :12,
+	        to_char(sysdate, 'YYYYMMDD.HH24MISS'),
+	        :13
+        )
+    </update>
+    <update id="update">
+        UPDATE OWNER
+        SET 
+	        OWNER_NAME = :V_OWNER_NAME,
+	        OWNER_PWD = :V_OWNER_PWD,
+	        OWNER_STR_NAME = :V_OWNER_STR_NAME,
+	        OWNER_STR_TEL = :V_OWNER_STR_TEL,
+	        OWNER_ADD1 = :V_OWNER_ADD1,
+	        OWNER_ADD2 = :V_OWNER_ADD2,
+	        LOGO_PATH = :V_LOGO_PATH,
+	        LOGO_FILE = :V_LOGO_FILE,
+	        UP_DATE = TO_CHAR(SYSDATE, 'YYYYMMDD.HH24MISS'),
+	        UP_USER_ID = :V_OWNER_SEQ
+        WHERE OWNER_SEQ = :V_OWNER_SEQ
+    </update>
+    <update id="update_pwd">
+        UPDATE OWNER
+        SET 
+	        OWNER_PWD = :1,
+	        UP_DATE = TO_CHAR(SYSDATE, 'YYYYMMDD.HH24MISS'),
+	        UP_USER_ID = '1'
+        WHERE OWNER_ID = :2
+    </update>
+    <update id="delete">
+        delete
+        from owner
+        where owner_seq =:1
+    </update>
+    <select id="id_check">
+        select
+        count(*)
+        from
+        owner
+        where
+        owner_id = :1
+    </select>
+    <select id="owner_str_num_check">
+        select
+        count(*)
+        from
+        owner
+        where
+        owner_str_num = :1
+    </select>
+    <select id="id_check_list">
+        select
+        *
+        from
+        owner
+        where
+        owner_id = :1
+        and
+        owner_str_num = :2
+    </select>
+    <select id="lastdays">
+        <![CDATA[
+        SELECT DT, NVL(OWN_CNT, 0)
+        FROM (SELECT COUNT(*)                                                     AS OWN_CNT,
+                     TO_CHAR(TO_DATE(IN_DATE, 'YYYYMMDD.HH24MISS'), 'YYYY-MM-DD') AS TR_IN_DATE
+              FROM OWNER
+              GROUP BY TO_CHAR(TO_DATE(IN_DATE, 'YYYYMMDD.HH24MISS'), 'YYYY-MM-DD')
+              ORDER BY TO_CHAR(TO_DATE(IN_DATE, 'YYYYMMDD.HH24MISS'), 'YYYY-MM-DD')
+             ) O
+                 RIGHT OUTER JOIN (
+            SELECT TO_CHAR(SYSDATE - LEVEL, 'YYYY-MM-DD') AS DT
+            FROM DUAL
+            CONNECT BY LEVEL <= :V_LEVEL
+        ) D ON TR_IN_DATE = DT
+        ORDER BY DT
+        ]]>
+    </select>
+    <select id="lastmonths">
+        <![CDATA[
+        SELECT DT, NVL(OWN_CNT, 0)
+        FROM (SELECT COUNT(*)                                                     AS OWN_CNT,
+                     TO_CHAR(TO_DATE(IN_DATE, 'YYYYMMDD.HH24MISS'), 'YYYY-MM') AS TR_IN_DATE
+              FROM OWNER
+              GROUP BY TO_CHAR(TO_DATE(IN_DATE, 'YYYYMMDD.HH24MISS'), 'YYYY-MM')
+              ORDER BY TO_CHAR(TO_DATE(IN_DATE, 'YYYYMMDD.HH24MISS'), 'YYYY-MM')
+             ) O
+                 RIGHT OUTER JOIN (
+            SELECT TO_CHAR(ADD_MONTHS(SYSDATE, 1 - LEVEL), 'YYYY-MM') AS DT
+            FROM DUAL
+            CONNECT BY LEVEL <= :V_LEVEL
+        ) D ON TR_IN_DATE = DT
+        ORDER BY DT
+        ]]>
+    </select>
+</mapper>
